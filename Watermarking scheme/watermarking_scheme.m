@@ -12,7 +12,7 @@ original = imresize(original, [2000, 2000]);
 watermark = imresize(watermark, [100, 100]);
 
 block_size = 10; % Dimenzija M x M blokova
-alpha = 0.9;
+alpha = 0.01;
 
 % Osiguravamo da su u vodenom žigu vrijednosti 0 ili 1
 threshold = 0.5;
