@@ -150,5 +150,5 @@ end
 figure;
 imshow(extracted_watermark_d2, []);
 title(['Rekonstruirani vodeni žig v2 (alpha = ', num2str(alpha), ')']);
-imwrite(extracted_watermark_d, ['reconstructed_watermark_v2_alpha_', num2str(alpha), '.jpg']);
+imwrite(extracted_watermark_d2, ['reconstructed_watermark_v2_alpha_', num2str(alpha), '.jpg']);
 
