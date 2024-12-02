@@ -1,0 +1,54 @@
+% U훾itavanje slika
+edit_file = '../Slike/watermarked_image_alpha_0.01_zgrade.jpg'; % Originalna slika
+original = imread(edit_file);
+original = rgb2gray(original);
+watermark_file = 'inz.png'; % Vodeni 탑ig
+watermark = imread(watermark_file);
+watermark = rgb2gray(watermark);
+watermark = im2double(watermark);
+
+% Pretvorba dimenzija
+original = imresize(original, [2000, 2000]);
+watermark = imresize(watermark, [100, 100]);
+
+block_size = 10; % Dimenzija M x M blokova
+alpha = 0.01;
+
+% Osiguravamo da su u vodenom 탑igu vrijednosti 0 ili 1
+threshold = 0.5;
+watermark = watermark > threshold;
+
+% Rekonstrukcija slike s vodenim 탑igom
+watermarked_image = [tl_w, tr; bl, br_w];
+imshow(watermarked_image);
+title(['Slika s umetnutim vodenim 탑igom (alpha = ', num2str(alpha), ')']);
+imwrite(watermarked_image, ['watermarked_image_alpha_', num2str(alpha), '.jpg']);
+
+% Ekstrakcija vodenog 엍ga
+extracted_watermark_d = zeros(size(modified_d));
+
+for i = 1:block_size_tl:tl_rows
+    for j = 1:block_size_tl:tl_cols
+        sub_block = tl_w(i:i+block_size_tl-1, j:j+block_size_tl-1);
+        [U, S, V] = svd(sub_block);
+        d = abs(S(1, 1));
+        row_index = ceil(i / block_size_tl);
+        col_index = ceil(j / block_size_tl);
+
+        low = floor(d);
+        high = ceil(d);
+        mid = (low + high) / 2;
+
+        if abs(d - mid) < abs(d - low)
+            extracted_watermark_d(row_index, col_index) = 0; % Blizu "mid"
+        else
+            extracted_watermark_d(row_index, col_index) = 1; % Dalje od "mid"
+        end
+    end
+end
+
+figure;
+imshow(extracted_watermark_d, []);
+title(['Rekonstruirani vodeni 탑ig (alpha = ', num2str(alpha), ')']);
+imwrite(extracted_watermark_d, ['reconstructed_watermark_alpha_', num2str(alpha), '.jpg']);
+
