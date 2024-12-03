@@ -8,7 +8,6 @@ watermark = imread(watermark_file);
 watermark = rgb2gray(watermark);
 watermark = im2double(watermark);
 
-
 % Pretvorba dimenzija
 original = imresize(original, [4000, 4000]);
 watermark = imresize(watermark, [100, 100]);
@@ -90,34 +89,3 @@ imshow(watermarked_image);
 title(['Slika s umetnutim vodenim žigom (alpha = ', num2str(alpha), ')']);
 imwrite(watermarked_image, ['watermarked_image_alpha_', num2str(alpha), '.jpg']);
 
-% Ekstrakcija vodenog žiga
-extracted_watermark_d2 = zeros(size(watermark));
-[tl_rows, tl_cols] = size(tl);
-[watermark_rows, watermark_cols] = size(watermark)
-block_size_tl = tl_rows / watermark_rows;
-
-
-for i = 1:block_size_tl:tl_rows
-    for j = 1:block_size_tl:tl_cols
-        sub_block = tl_w(i:i+block_size_tl-1, j:j+block_size_tl-1);
-        [U, S, V] = svd(sub_block);
-        d = S(1, 1);
-        row_index = ceil(i / block_size_tl);
-        col_index = ceil(j / block_size_tl);
-
-        low = floor(d);
-        high = ceil(d);
-        mid = (low + high) / 2;
-
-        if abs(d - mid) < abs(d - low)
-            extracted_watermark_d2(row_index, col_index) = 0;
-        else
-            extracted_watermark_d2(row_index, col_index) = 1;
-        end
-    end
-end
-
-figure;
-imshow(extracted_watermark_d2, []);
-title(['Rekonstruirani vodeni žig v2 (alpha = ', num2str(alpha), ')']);
-imwrite(extracted_watermark_d2, ['reconstructed_watermark_v2_alpha_', num2str(alpha), '.jpg']);

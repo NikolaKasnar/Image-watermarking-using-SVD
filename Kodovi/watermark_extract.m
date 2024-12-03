@@ -13,7 +13,7 @@ tr = image(1:(rows / 2), (cols / 2)+1:end);
 bl = image((rows / 2)+1:end, 1:(cols / 2));
 br = image((rows / 2)+1:end, (cols / 2)+1:end);
 
-% Ekstrakcija vodenog žiga v2
+% Ekstrakcija vodenog žiga
 extracted_watermark_d2 = zeros([100, 100]);
 [tl_rows, tl_cols] = size(tl);
 watermark_rows = 100;
