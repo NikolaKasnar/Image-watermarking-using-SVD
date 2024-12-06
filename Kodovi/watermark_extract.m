@@ -1,46 +1,63 @@
-image = imread('watermarked_image_alpha_0.01.jpg');
+% Učitavanje slike s vodenim žigom
+image = imread('watermarked_image_grid_4x4_alpha_0.01_rotation_brush_donji_desni_free.jpg');
+% image = rgb2gray(image);
 image = im2double(image);
 
 % Pretvorba dimenzija
 image = imresize(image, [4000, 4000]);
 
-block_size = 20; % Dimenzija M x M blokova
-
-% Podjela slike u 4 bloka
+% Parametri za blokove
 [rows, cols] = size(image);
-tl = image(1:(rows / 2), 1:(cols / 2));
-tr = image(1:(rows / 2), (cols / 2)+1:end);
-bl = image((rows / 2)+1:end, 1:(cols / 2));
-br = image((rows / 2)+1:end, (cols / 2)+1:end);
+num_blocks = 4; % Mreža 4x4 blokova
+block_rows = rows / num_blocks;
+block_cols = cols / num_blocks;
 
-% Ekstrakcija vodenog žiga
-extracted_watermark_d2 = zeros([100, 100]);
-[tl_rows, tl_cols] = size(tl);
+% Dimenzije vodenog žiga u skladu s blokovima
 watermark_rows = 100;
 watermark_cols = 100;
-block_size_tl = tl_rows / watermark_rows;
+block_size = block_rows / watermark_rows;
 
-for i = 1:block_size_tl:tl_rows
-    for j = 1:block_size_tl:tl_cols
-        sub_block = tl(i:i+block_size_tl-1, j:j+block_size_tl-1);
-        [U, S, V] = svd(sub_block);
-        d = abs(S(1, 1));
-        row_index = ceil(i / block_size_tl);
-        col_index = ceil(j / block_size_tl);
+% Ekstrakcija vodenog žiga iz svakog bloka
+extracted_watermark = zeros(watermark_rows, watermark_cols);
 
-        low = floor(d);
-        high = ceil(d);
-        mid = (low + high) / 2;
+for row_block = 1:num_blocks
+    for col_block = 1:num_blocks
+        % Izolacija trenutnog bloka
+        r_start = (row_block - 1) * block_rows + 1;
+        r_end = row_block * block_rows;
+        c_start = (col_block - 1) * block_cols + 1;
+        c_end = col_block * block_cols;
+        block = image(r_start:r_end, c_start:c_end);
 
-        if abs(d - mid) < abs(d - low)
-            extracted_watermark_d2(row_index, col_index) = 0;
-        else
-            extracted_watermark_d2(row_index, col_index) = 1;
+        % Ekstrakcija vodenog žiga iz trenutnog bloka
+        for i = 1:block_size:block_rows
+            for j = 1:block_size:block_cols
+                sub_block = block(i:i+block_size-1, j:j+block_size-1);
+                [U, S, V] = svd(sub_block);
+                d = abs(S(1, 1)); % Ekstrakcija najveće singularne vrijednosti
+
+                % Izračun pozicije u vodenom žigu
+                row_index = ceil(i / block_size);
+                col_index = ceil(j / block_size);
+
+                % Kvantizacija za rekonstrukciju
+                low = floor(d);
+                high = ceil(d);
+                mid = (low + high) / 2;
+
+                if abs(d - mid) < abs(d - low)
+                    extracted_watermark(row_index, col_index) = 0;
+                else
+                    extracted_watermark(row_index, col_index) = 1;
+                end
+            end
         end
     end
 end
 
+% Prikaz i spremanje rekonstruiranog vodenog žiga
 figure;
-imshow(extracted_watermark_d2, []);
-title(['Rekonstruirani vodeni žig ']);
-imwrite(extracted_watermark_d2, ['reconstructed_watermark.jpg']);
+imshow(extracted_watermark, []);
+title('Rekonstruirani vodeni žig');
+imwrite(extracted_watermark, 'reconstructed_watermarked_image_grid_4x4_alpha_0.01_rotation_brush_donji_desni_free.jpg');
+
