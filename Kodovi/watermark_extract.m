@@ -1,6 +1,5 @@
 % Učitavanje slike s vodenim žigom
 image = imread('watermarked_image_grid_4x4_alpha_0.01_rotation_brush_donji_desni_free.jpg');
-% image = rgb2gray(image);
 image = im2double(image);
 
 % Pretvorba dimenzija
@@ -20,6 +19,7 @@ block_size = block_rows / watermark_rows;
 % Ekstrakcija vodenog žiga iz svakog bloka
 extracted_watermark = zeros(watermark_rows, watermark_cols);
 
+% Prolaz kroz sve blokove
 for row_block = 1:num_blocks
     for col_block = 1:num_blocks
         % Izolacija trenutnog bloka
@@ -46,18 +46,21 @@ for row_block = 1:num_blocks
                 mid = (low + high) / 2;
 
                 if abs(d - mid) < abs(d - low)
-                    extracted_watermark(row_index, col_index) = 0;
+                    extracted_watermark(row_index, col_index) = extracted_watermark(row_index, col_index) + 0; % Nema žiga
                 else
-                    extracted_watermark(row_index, col_index) = 1;
+                    extracted_watermark(row_index, col_index) = extracted_watermark(row_index, col_index) + 1; % Žig prisutan
                 end
             end
         end
     end
 end
 
+% Normalizacija ekstraktiranog žiga kako bi se izbjegla akumulacija
+extracted_watermark = extracted_watermark / (num_blocks * num_blocks);
+
 % Prikaz i spremanje rekonstruiranog vodenog žiga
 figure;
 imshow(extracted_watermark, []);
 title('Rekonstruirani vodeni žig');
-imwrite(extracted_watermark, 'reconstructed_watermarked_image_grid_4x4_alpha_0.01_rotation_brush_donji_desni_free.jpg');
+imwrite(extracted_watermark, 'reconstructed_watermarked_image_grid_4x4_alpha_0.01_rotation_brush_donji_desni_free_2.jpg');
 
